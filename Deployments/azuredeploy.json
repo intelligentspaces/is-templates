@@ -1,0 +1,120 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.6.18.56646",
+      "templateHash": "15459791972849733430"
+    }
+  },
+  "parameters": {
+    "lifecycle": {
+      "type": "string",
+      "allowedValues": [
+        "dev",
+        "test",
+        "prod"
+      ],
+       "metadata": {
+        "description": "Lifecycle to identify the environment to create."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+       "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "projectName": {
+      "type": "string",
+      "maxLength": 11,
+      "minLength": 1,
+       "metadata": {
+        "description": "Name of the project."
+      }
+    },
+    "resourcePrefix": {
+      "type": "string",
+      "maxLength": 3,
+      "minLength": 1,
+       "metadata": {
+        "description": "Resource Prefix to identify each resource."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "[format('{0}{1}stg{2}', toLower(parameters('projectName')), parameters('lifecycle'), parameters('resourcePrefix'))]",
+       "metadata": {
+        "description": "Name of the storage account."
+      }
+    },
+    "storageContainerName": {
+      "type": "string",
+      "defaultValue": "3dscenestore",
+       "metadata": {
+        "description": "Name of the storage account container."
+      }
+    },
+    "digitalTwinName": {
+      "type": "string",
+      "defaultValue": "[format('{0}{1}twin{2}', toLower(parameters('projectName')), parameters('lifecycle'), parameters('resourcePrefix'))]",
+       "metadata": {
+        "description": "Name of the Digital Twins instance."
+      }
+    }
+  },
+  "variables": {
+    "tags": {
+      "dpor": "Elastacloud Ltd",
+      "version": "3.0.0.0",
+      "environment": "[parameters('lifecycle')]",
+      "project": "EIS"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2019-06-01",
+      "name": "[parameters('storageAccountName')]",
+      "tags": "[variables('tags')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "Storage"
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2019-06-01",
+      "name": "[format('{0}/default/{1}', parameters('storageAccountName'), parameters('storageContainerName'))]",
+      "properties": {
+        "publicAccess": "None"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DigitalTwins/digitalTwinsInstances",
+      "apiVersion": "2020-03-01-preview",
+      "name": "[parameters('digitalTwinName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "sku": {
+        "name": "F1"
+      }
+    }
+  ],
+  "outputs": {
+    "digitalTwinN": {
+      "type": "string",
+      "value": "[parameters('digitalTwinName')]"
+    },
+    "digitalTwinHostname": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', parameters('digitalTwinName'))).hostName]"
+    }
+  }
+}
