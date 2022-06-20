@@ -1,0 +1,133 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.7.4.23292",
+      "templateHash": "13886652372596046841"
+    }
+  },
+  "parameters": {
+    "lifecycle": {
+      "type": "string",
+      "defaultValue": "dev",
+      "metadata": {
+        "description": "Development lifecycle of the deployment, this is included as part of the name to help identify resources and keep them unique"
+      },
+      "allowedValues": [
+        "dev",
+        "test",
+        "prod"
+      ]
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Region where the resources will be deployed to"
+      }
+    },
+    "projectName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name the project for which the deployment is being carried out for"
+      },
+      "maxLength": 11,
+      "minLength": 1
+    },
+    "resourceSuffix": {
+      "type": "string",
+      "metadata": {
+        "description": "Suffix to add to the resources to help identify them"
+      },
+      "maxLength": 3,
+      "minLength": 1
+    }
+  },
+  "variables": {
+    "storageAccountName": "[format('{0}{1}stg{2}', toLower(parameters('projectName')), parameters('lifecycle'), parameters('resourceSuffix'))]",
+    "storageContainerName": "3dscenestore",
+    "digitalTwinName": "[format('{0}{1}twin{2}', toLower(parameters('projectName')), parameters('lifecycle'), parameters('resourceSuffix'))]",
+    "tags": {
+      "dpor": "Elastacloud Ltd",
+      "version": "1.0.0.0",
+      "environment": "[parameters('lifecycle')]",
+      "solutionProvider": "intelligentspaces.io",
+      "project": "[parameters('projectName')]"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2021-09-01",
+      "name": "[format('{0}/{1}/{2}', variables('storageAccountName'), 'default', variables('storageContainerName'))]",
+      "properties": {
+        "publicAccess": "None"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccountName'), 'default')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2021-09-01",
+      "name": "[format('{0}/{1}', variables('storageAccountName'), 'default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2021-09-01",
+      "name": "[variables('storageAccountName')]",
+      "tags": "[variables('tags')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "minimumTlsVersion": "TLS1_2",
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "keySource": "Microsoft.Storage",
+          "services": {
+            "blob": {
+              "enabled": true
+            },
+            "file": {
+              "enabled": true
+            },
+            "queue": {
+              "enabled": true
+            },
+            "table": {
+              "enabled": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DigitalTwins/digitalTwinsInstances",
+      "apiVersion": "2021-06-30-preview",
+      "name": "[variables('digitalTwinName')]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "properties": {
+        "publicNetworkAccess": "Enabled"
+      }
+    }
+  ],
+  "outputs": {
+    "digitalTwinName": {
+      "type": "string",
+      "value": "[variables('digitalTwinName')]"
+    },
+    "digitalTwinHostname": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', variables('digitalTwinName'))).hostName]"
+    }
+  }
+}
