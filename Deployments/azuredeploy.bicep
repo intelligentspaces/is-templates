@@ -8,23 +8,29 @@
   'test'
   'prod'
 ])
-param lifecycle string 
-param location string
+@description('Lifecycle to identify the environment to create.')
+param lifecycle string = 'dev'
 @minLength(1) 
 @maxLength(11)
-param projectName string 
+@description('Name of the project.')
+param projectName string = 'eis'
 @minLength(1) 
 @maxLength(3)
-param resourcePrefix string 
-param storageAccountName string = '${toLower(projectName)}${lifecycle}stg${resourcePrefix}'
-param storageContainerName string = '3dscenestore'
-param digitalTwinName string = '${toLower(projectName)}${lifecycle}twin${resourcePrefix}'
+@description('Resource Prefix to identify each resource.')
+param resourcePrefix string = '01'
+@description('Location for all resources.')
+param location string = resourceGroup().location
+
 
 /* 
 ******************  
     Variables
 ****************** 
 */
+var storageAccountName = '${toLower(projectName)}${lifecycle}stg${resourcePrefix}'
+var storageContainerName = '3dscenestore'
+var digitalTwinName = '${toLower(projectName)}${lifecycle}twin${resourcePrefix}'
+
 var tags = {
   dpor: 'Elastacloud Ltd'
   version: '3.0.0.0'
