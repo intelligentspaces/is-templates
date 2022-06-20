@@ -1,6 +1,6 @@
 # Deploy and Azure Digital Twin
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fintelligentspaces%2Fis-templates%2Finfrastructure-deploy%2FDeployments%2Fazuredeploy.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fintelligentspaces%2Fis-templates%2Fmain%2FDeployments%2Fazuredeploy.json)
 
 This template will deploy the components necessary to create an [Azure Digital Twin](https://azure.microsoft.com/services/digital-twins/) instance which can support 3D scenes. This includes
 
