@@ -53,7 +53,7 @@
     "digitalTwinName": "[format('{0}{1}twin{2}', toLower(parameters('projectName')), parameters('lifecycle'), parameters('resourcePrefix'))]",
     "tags": {
       "dpor": "Elastacloud Ltd",
-      "version": "3.0.0.0",
+      "version": "1.0.0.0",
       "environment": "[parameters('lifecycle')]",
       "project": "EIS"
     }
