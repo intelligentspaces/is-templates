@@ -51,7 +51,7 @@
     "digitalTwinName": "[format('{0}{1}twin{2}', toLower(parameters('projectName')), parameters('lifecycle'), parameters('resourceSuffix'))]",
     "tags": {
       "dpor": "Elastacloud Ltd",
-      "version": "3.0.0.0",
+      "version": "1.0.0.0",
       "environment": "[parameters('lifecycle')]",
       "solutionProvider": "intelligentspaces.io",
       "project": "[parameters('projectName')]"
