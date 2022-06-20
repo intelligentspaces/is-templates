@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.6.18.56646",
-      "templateHash": "5287440015243460603"
+      "version": "0.7.4.23292",
+      "templateHash": "13886652372596046841"
     }
   },
   "parameters": {
@@ -13,7 +13,7 @@
       "type": "string",
       "defaultValue": "dev",
       "metadata": {
-        "description": "Lifecycle to identify the environment to create."
+        "description": "Development lifecycle of the deployment, this is included as part of the name to help identify resources and keep them unique"
       },
       "allowedValues": [
         "dev",
@@ -21,79 +21,107 @@
         "prod"
       ]
     },
-    "projectName": {
-      "type": "string",
-      "defaultValue": "eis",
-      "metadata": {
-        "description": "Name of the project."
-      },
-      "maxLength": 11,
-      "minLength": 1
-    },
-    "resourcePrefix": {
-      "type": "string",
-      "defaultValue": "01",
-      "metadata": {
-        "description": "Resource Prefix to identify each resource."
-      },
-      "maxLength": 3,
-      "minLength": 1
-    },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
       "metadata": {
-        "description": "Location for all resources."
+        "description": "Region where the resources will be deployed to"
       }
+    },
+    "projectName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name the project for which the deployment is being carried out for"
+      },
+      "maxLength": 11,
+      "minLength": 1
+    },
+    "resourceSuffix": {
+      "type": "string",
+      "metadata": {
+        "description": "Suffix to add to the resources to help identify them"
+      },
+      "maxLength": 3,
+      "minLength": 1
     }
   },
   "variables": {
-    "storageAccountName": "[format('{0}{1}stg{2}', toLower(parameters('projectName')), parameters('lifecycle'), parameters('resourcePrefix'))]",
+    "storageAccountName": "[format('{0}{1}stg{2}', toLower(parameters('projectName')), parameters('lifecycle'), parameters('resourceSuffix'))]",
     "storageContainerName": "3dscenestore",
-    "digitalTwinName": "[format('{0}{1}twin{2}', toLower(parameters('projectName')), parameters('lifecycle'), parameters('resourcePrefix'))]",
+    "digitalTwinName": "[format('{0}{1}twin{2}', toLower(parameters('projectName')), parameters('lifecycle'), parameters('resourceSuffix'))]",
     "tags": {
       "dpor": "Elastacloud Ltd",
       "version": "1.0.0.0",
       "environment": "[parameters('lifecycle')]",
-      "project": "EIS"
+      "solutionProvider": "intelligentspaces.io",
+      "project": "[parameters('projectName')]"
     }
   },
   "resources": [
     {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2021-09-01",
+      "name": "[format('{0}/{1}/{2}', variables('storageAccountName'), 'default', variables('storageContainerName'))]",
+      "properties": {
+        "publicAccess": "None"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccountName'), 'default')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2021-09-01",
+      "name": "[format('{0}/{1}', variables('storageAccountName'), 'default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
       "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2019-06-01",
+      "apiVersion": "2021-09-01",
       "name": "[variables('storageAccountName')]",
       "tags": "[variables('tags')]",
       "location": "[parameters('location')]",
       "sku": {
         "name": "Standard_LRS"
       },
-      "kind": "Storage"
-    },
-    {
-      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-      "apiVersion": "2019-06-01",
-      "name": "[format('{0}/default/{1}', variables('storageAccountName'), variables('storageContainerName'))]",
+      "kind": "StorageV2",
       "properties": {
-        "publicAccess": "None"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
-      ]
+        "minimumTlsVersion": "TLS1_2",
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "keySource": "Microsoft.Storage",
+          "services": {
+            "blob": {
+              "enabled": true
+            },
+            "file": {
+              "enabled": true
+            },
+            "queue": {
+              "enabled": true
+            },
+            "table": {
+              "enabled": true
+            }
+          }
+        }
+      }
     },
     {
       "type": "Microsoft.DigitalTwins/digitalTwinsInstances",
-      "apiVersion": "2020-03-01-preview",
+      "apiVersion": "2021-06-30-preview",
       "name": "[variables('digitalTwinName')]",
       "location": "[parameters('location')]",
       "tags": "[variables('tags')]",
-      "sku": {
-        "name": "F1"
+      "properties": {
+        "publicNetworkAccess": "Enabled"
       }
     }
   ],
   "outputs": {
-    "digitalTwinN": {
+    "digitalTwinName": {
       "type": "string",
       "value": "[variables('digitalTwinName')]"
     },
