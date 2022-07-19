@@ -106,8 +106,9 @@ resource adt 'Microsoft.DigitalTwins/digitalTwinsInstances@2021-06-30-preview' =
 */
 
 output digitalTwinHostname string = adt.properties.hostName
-output storageAccountKey string = 'DefaultEndpointsProtocol=https;AccountName=${stg.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(stg.id, stg.apiVersion).keys[0].value}'
+output storageAccountKey string = 'DefaultEndpointsProtocol=https;AccountName=${stg.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${stg.listKeys().keys[0].value}'
 output storageAccountCotainerURI string = '${stg.properties.primaryEndpoints.blob}${storageContainerName}'
+
 
 
 
