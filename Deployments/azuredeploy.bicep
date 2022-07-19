@@ -77,14 +77,41 @@ resource stg 'Microsoft.Storage/storageAccounts@2021-09-01' = {
       }
     }
   }
-  resource services 'blobServices' = {
-    name: 'default'
+}
+  
+resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2021-09-01' = {
+  parent: services
+  name: storageContainerName
+  properties: {
+    publicAccess: 'None'
+  }
+}
 
-    resource container 'containers' = {
-      name: storageContainerName
-      properties: {
-        publicAccess: 'None'
-      }
+resource services 'Microsoft.Storage/storageAccounts/blobServices@2021-09-01' = {
+  parent: stg
+  name: 'default'
+  properties: {
+    cors: {
+      corsRules: [
+        {
+          allowedOrigins: [
+            'https://explorer.digitaltwins.azure.net'
+          ]
+          allowedMethods: [
+            'GET'
+            'OPTIONS'
+            'POST'
+            'PUT'
+          ]
+          maxAgeInSeconds: 0
+          allowedHeaders: [
+            'Authorization,x-ms-version,x-ms-blob-type'
+          ]
+          exposedHeaders: [
+            ''
+          ]
+        }
+      ]
     }
   }
 }
@@ -108,9 +135,6 @@ resource adt 'Microsoft.DigitalTwins/digitalTwinsInstances@2021-06-30-preview' =
 output digitalTwinHostname string = adt.properties.hostName
 output storageAccountKey string = 'DefaultEndpointsProtocol=https;AccountName=${stg.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${stg.listKeys().keys[0].value}'
 output storageAccountCotainerURI string = '${stg.properties.primaryEndpoints.blob}${storageContainerName}'
-
-
-
 
 
 

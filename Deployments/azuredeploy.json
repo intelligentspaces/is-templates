@@ -75,7 +75,31 @@
       "name": "[format('{0}/{1}', variables('storageAccountName'), 'default')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
-      ]
+      ],
+      "properties": {
+        "cors": {
+          "corsRules": [
+            {
+              "allowedOrigins": [
+                "https://explorer.digitaltwins.azure.net"
+              ],
+              "allowedMethods": [
+                "GET",
+                "OPTIONS",
+                "POST",
+                "PUT"
+              ],
+              "maxAgeInSeconds": 0,
+              "allowedHeaders": [
+                "Authorization,x-ms-version,x-ms-blob-type"
+              ],
+              "exposedHeaders": [
+                ""
+              ]
+            }
+          ]
+        }
+      }
     },
     {
       "type": "Microsoft.Storage/storageAccounts",
