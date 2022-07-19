@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.7.4.23292",
-      "templateHash": "13886652372596046841"
+      "version": "0.6.18.56646",
+      "templateHash": "1719918507943708230"
     }
   },
   "parameters": {
@@ -121,13 +121,17 @@
     }
   ],
   "outputs": {
-    "digitalTwinName": {
-      "type": "string",
-      "value": "[variables('digitalTwinName')]"
-    },
     "digitalTwinHostname": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', variables('digitalTwinName'))).hostName]"
+    },
+    "storageAccountKey": {
+      "type": "string",
+      "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-09-01').keys[0].value)]"
+    },
+    "storageAccountCotainerURI": {
+      "type": "string",
+      "value": "[format('{0}{1}', reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob, variables('storageContainerName'))]"
     }
   }
 }
